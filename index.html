@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Discussion Portal</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<style>
+		.split {
+  height: 100%;
+  width: 50%;
+  position: absolute;
+  /*z-index: 1;*/
+  top: 70px;
+  /*overflow-x: hidden;*/
+  padding-top: 2px;
+ border-right: 1px solid #d5d3e3;
+}
+
+/* Control the left side */
+.left {
+  top: 130px;
+  left: 0px;
+  background-color: #ecebf0;
+  border-top: 1px solid #d5d3e3;
+  position: absolute;
+}
+
+/* Control the right side */
+.right {
+  margin-left:20px;
+  top:130px;
+  right: -20px; 
+  /*transform: translate(-15%, 20%);*/
+  text-align: left; 
+  margin-left: 20px;
+}
+
+#upperLeft {
+border-right: 1px solid #d5d3e3;
+}
+
+/* If you want the content centered horizontally and vertically */
+.centered {
+  position: absolute;
+  top: 50%;
+  left: 50%; 
+}
+
+#discuss {
+font-size: large;
+font-weight: bold;
+height:70px;
+line-height: 70px;
+padding-left:10px;
+background-color: #0f948b;
+color: white;
+width:100%;	
+}
+
+#add-question {
+float:left;
+margin: 10px;
+}
+
+#search {
+float:left;
+padding-left: 10px;
+height:30px;
+margin:10px;
+}
+
+.h1 {
+	font-size: large;
+	font-weight: bolder;
+	margin-left: 5px;
+}
+
+.h2 {
+font-size: small; 
+	padding-bottom: 20px;
+	border-bottom: 1px solid #d5d3e3;
+	margin-left: 5px;
+	border-width: 50%;
+}
+
+.q1 {
+	font-size: large;
+	font-weight: bolder;
+	margin-left: 5px;
+}
+
+.q2 {
+	font-size: small; 
+	margin-left: 5px;
+	padding-bottom: 20px;
+	border-bottom: 1px solid #d5d3e3;
+	border-width: 50%;
+}
+
+#welcome {
+	font-weight: bold;
+	font-size: x-large;
+}
+
+#get-started {
+	margin-top: 5px;
+	margin-bottom: 5px;
+	font-size: small;
+}
+
+#subject, #name {
+	float: left;
+	/*margin-left:20px;*/
+	margin-bottom: 5px;
+}
+
+#question, #comment{
+	float: left;
+	width:90%;
+	/*margin-left:20px;*/
+	margin-top: 5px;
+}
+
+#submit, #resolve, #alsoSubmit {
+	margin-top: 7px;
+	margin-right: 65px;
+	float: right;
+}
+</style>
+</head>
+<body>
+<div id="discuss">Discussion Portal</div>
+<div id="upper-left">
+	<button id="add-question" class="btn btn-primary">New Question Form</button>
+    <input type="text" id="search" onkeyup="searchBar()" placeholder="search questions..."></div>
+<ul class="split left" style="list-style-type: none;" id="sus"></ul>
+
+<div class="split right">
+<!--div class="centered"-->
+	<div id="welcome">Welcome to Discussion Portal!</div>
+	<div id="get-started">Enter a subject and question to get started</div>
+	<form action="#" id="kevin">
+	<input id="subject" type="text" placeholder="Subject" required><br>
+	<textarea id="question" rows="8" cols="60" placeholder="Question" required></textarea>
+	<button class="btn btn-primary" id="submit">Submit</button>
+</form>
+</div>
+</div>
+</body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<script>
+    var submitButton = document.querySelector("#submit");
+	var addQuestion = document.querySelector("add-question");
+	var i=0;
+	document.querySelector("#kevin").onsubmit=function publishQuestion() {
+		var title = document.querySelector("#subject").value;
+		var Question = document.querySelector("#question").value;
+		var appendToLeft = document.querySelector(".left");
+		var toAppend = `<li class="h" id="${i}"><div class="h1" id="${i}">${title}
+		</div><div class="h2" id="${i}">${Question}</div></li>`;
+		var json_string= JSON.stringify(toAppend);
+		if (typeof(Storage) !== "undefined") {
+		localStorage.setItem(`li_value${i}`,json_string);
+		localStorage.setItem("num",i);}
+		appendToLeft.innerHTML += toAppend;
+		i+=1;
+	}
+
+	document.querySelector(".left").addEventListener("click",function(e) {
+		if(e.target && (e.target.className =="h" ||  e.target.className =="h1" ||  e.target.className =="h2"))
+		{
+			var divId = e.target.id;
+			clickQuery(divId);
+		}
+	})
+
+	function clickQuery(divId) {
+		//console.log(divId);
+		var content = document.getElementById(divId).innerHTML;
+		document.querySelector(".right").innerHTML="";
+		document.querySelector(".right").innerHTML=`<div id="qform" style="color:#d5d3e3; font-size:medium">Question</div>
+		                                                <form action="#" onsubmit="resolveQuery(${divId})">
+		                                                <div style="background-color:#ecebf0; width:90%">${content}</div>
+		                                                <button class="btn btn-primary" style="float:right; margin-top:10px; margin-right:65px">Resolve</button>
+		                                                </form>
+		                                                <br><br>
+		                                                <div id="response" style="color:#d5d3e3; margin-top:10px; margin-bottom:20px">Response</div>
+		                                                <br><br>
+		                                                <div style="font-size:medium;color:#d5d3e3">Add Response</div>
+		                                                <form action="#" onsubmit="appendQuery(${divId})">
+		                                                <input id="name" type="text" placeholder="Enter Name" required><br>
+	                                                     <textarea id="comment" rows="7" cols="60" placeholder="Enter Comment" required></textarea>
+	                                                     <button class="btn btn-primary id="alsoSubmit" style="float:right; margin-top:10px; margin-right:65px">Submit</button></form>`
+
+	} 
+    
+    var j=0;
+    var responseAppend = document.getElementById("response");
+
+    function appendQuery(divId) {
+        //showPrevResponses(divId);
+    	var name = document.querySelector("#name").value;
+    	var comment = document.querySelector("#comment").value;
+    	var str = `<div class="q" id="${j}in" style="background-color:#ecebf0; width:90%">
+    	                           <div class="q1" id="${j}in" style="color:black">${name}</div>
+    	                           <div class="q2" id="${j}in" style="color:black">${comment}</div>
+    	                           </div>`
+    	var newStr = JSON.stringify(str);
+    	if (typeof(Storage) !== "undefined") {
+    	localStorage.setItem(`ul_value${j}`,newStr);
+    	localStorage.setItem("num2",j);
+        }
+    	responseAppend.innerHTML+=str; j+=1;
+    	}
+
+        function showPrevResponses(divId){
+        var no = localStorage.getItem("num2");
+        if(no!=null){
+        for(var i=0;i<no;i++)
+        {
+	     responseAppend.innerHTML+=JSON.parse(localStorage.getItem(`ul_value${i}`));
+        }
+        }
+        }
+
+    function resolveQuery(divId) {
+       document.getElementById(divId).remove();
+       if (typeof(Storage) !== "undefined") {
+       localStorage.removeItem(`li_value${divId}`);
+       localStorage.removeItem(`ul_value${divId}`);
+       localStorage.setItem("num",localStorage.getItem("num")-1);
+       }
+       document.querySelector(".right").innerHTML="";
+       document.querySelector(".right").innerHTML=`<div id="welcome">Welcome to Discussion Portal!</div>
+	<div id="get-started">Enter a subject and question to get started</div>
+	<form action="#" onsubmit="publishQuestion()">
+	<input id="subject" type="text" placeholder="Subject" required><br>
+	<textarea id="question" rows="8" cols="60" placeholder="Question" required></textarea>
+	<button class="btn btn-primary" id="submit">Submit</button>
+</form>`
+    }
+
+    function searchBar() {
+     var input, filter, ul, li, a, i, txtValue;
+  input = document.getElementById('search');
+  filter = input.value.toUpperCase();
+  ul = document.getElementById("sus");
+  li = ul.getElementsByTagName('li');
+
+  // Loop through all list items, and hide those who don't match the search query
+  for (i = 0; i < li.length; i++) {
+    a = li[i].getElementsByTagName("div")[0];
+    txtValue = a.textContent || a.innerText;
+    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+      li[i].style.display = "";
+    } else {
+      li[i].style.display = "none";
+    }
+  }
+    	}
+
+ window.onload=function() {
+var n = localStorage.getItem("num");
+if(n!=null && n>=0){
+for(var i=0;i<=n;i++)
+{
+	document.querySelector(".left").innerHTML+=JSON.parse(localStorage.getItem(`li_value${i}`));
+ }
+}
+}
+</script>
+</html>
